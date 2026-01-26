@@ -1,0 +1,8 @@
+# Compiled binary
+Resonance
+*.exe
+*.out
+
+# IDE configs
+.idea/
+.vscode/
