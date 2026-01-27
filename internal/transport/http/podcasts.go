@@ -8,12 +8,12 @@ import (
 )
 
 type Handler struct {
-	podcastService service.PodcastService
+	services *service.Service
 }
 
-func NewHandler(podcastService service.PodcastService) *Handler {
+func NewHandler(services *service.Service) *Handler {
 	return &Handler{
-		podcastService: podcastService,
+		services: services,
 	}
 }
 
@@ -23,7 +23,7 @@ func (h *Handler) GetPodcasts(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 
-	podcasts, err := h.podcastService.GetAll(ctx)
+	podcasts, err := h.services.PodcastService.GetAll(ctx)
 	if err != nil {
 		http.Error(w, "Failed to get podcasts", http.StatusInternalServerError)
 		return
