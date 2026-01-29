@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/iamni1/resonance-mock/internal/config"
 	"github.com/iamni1/resonance-mock/internal/pkg/postgres"
 	"github.com/iamni1/resonance-mock/internal/service"
 	httphandlers "github.com/iamni1/resonance-mock/internal/transport/http"
@@ -12,15 +13,17 @@ import (
 
 func main() {
 
-	dsn := "postgres://postgres:resonance_secret@localhost:5433/resonance_db"
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatal("Config error: ", err)
+	}
 
 	ctx := context.Background()
 
-	pool, err := postgres.NewClient(ctx, dsn)
+	pool, err := postgres.NewClient(ctx, cfg.DB_DSN)
 	if err != nil {
 		log.Fatal("DB init error: ", err)
 	}
-
 	defer pool.Close()
 
 	services := service.NewService(pool)
