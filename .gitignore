@@ -6,3 +6,5 @@ Resonance
 # IDE configs
 .idea/
 .vscode/git 
+
+.env
