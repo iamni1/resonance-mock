@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/iamni1/resonance-mock/internal/service"
 	"github.com/jackc/pgx/v5"
 )
@@ -38,10 +39,17 @@ func (h *Handler) GetPodcasts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetPodcastByID(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
+	idStr := r.PathValue("id")
+
+	_, err := uuid.Parse(idStr)
+	if err != nil {
+		http.Error(w, "Invalid podcast ID format", http.StatusBadRequest)
+		return
+	}
+
 	ctx := r.Context()
 
-	podcast, err := h.services.PodcastService.GetByID(ctx, id)
+	podcast, err := h.services.PodcastService.GetByID(ctx, idStr)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			http.Error(w, "Podcast not found", http.StatusNotFound)
