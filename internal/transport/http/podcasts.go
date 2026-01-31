@@ -2,9 +2,11 @@ package httphandlers
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/iamni1/resonance-mock/internal/service"
+	"github.com/jackc/pgx/v5"
 )
 
 type Handler struct {
@@ -31,6 +33,26 @@ func (h *Handler) GetPodcasts(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewEncoder(w).Encode(podcasts)
 	if err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
+}
+
+func (h *Handler) GetPodcastByID(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	ctx := r.Context()
+
+	podcast, err := h.services.PodcastService.GetByID(ctx, id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			http.Error(w, "Podcast not found", http.StatusNotFound)
+		} else {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(podcast); err != nil {
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 	}
 }

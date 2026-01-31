@@ -48,3 +48,17 @@ func (r *podcastRepo) GetAll(ctx context.Context) ([]domain.Podcast, error) {
 
 	return podcasts, nil
 }
+
+func (r *podcastRepo) GetByID(ctx context.Context, id string) (domain.Podcast, error) {
+
+	query := `SELECT id, title, author, cover_url, description FROM podcasts WHERE id = $1`
+
+	var p domain.Podcast
+
+	err := r.pool.QueryRow(ctx, query, id).Scan(&p.ID, &p.Title, &p.Author, &p.CoverURL, &p.Description)
+	if err != nil {
+		return domain.Podcast{}, fmt.Errorf("failed to scan row: %w", err)
+	}
+
+	return p, nil
+}
