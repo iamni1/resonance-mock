@@ -36,6 +36,7 @@ func main() {
 	})
 	mux.HandleFunc("GET /api/v1/podcasts", handler.GetPodcasts)
 	mux.HandleFunc("GET /api/v1/podcasts/{id}", handler.GetPodcastByID)
+	mux.HandleFunc("POST /api/v1/podcasts", handler.CreatePodcast)
 
 	server := http.Server{
 		Addr:    ":8080",

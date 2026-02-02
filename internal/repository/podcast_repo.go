@@ -62,3 +62,22 @@ func (r *podcastRepo) GetByID(ctx context.Context, id string) (domain.Podcast, e
 
 	return p, nil
 }
+
+func (r *podcastRepo) Create(ctx context.Context, podcast domain.Podcast) error {
+	query := `INSERT INTO podcasts (id, title, author, cover_url, description) 
+			   VALUES ($1, $2, $3, $4, $5)`
+
+	_, err := r.pool.Exec(ctx, query,
+		podcast.ID,
+		podcast.Title,
+		podcast.Author,
+		podcast.CoverURL,
+		podcast.Description,
+	)
+
+	if err != nil {
+		return fmt.Errorf("failed to create podcast: %w", err)
+	}
+
+	return nil
+}
