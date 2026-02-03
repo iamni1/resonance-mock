@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"log"
+	"log/slog"
 	"net/http"
+	"os"
 
 	"github.com/iamni1/resonance-mock/internal/config"
 	"github.com/iamni1/resonance-mock/internal/pkg/postgres"
@@ -12,6 +14,12 @@ import (
 )
 
 func main() {
+
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+
+	slog.SetDefault(logger)
+
+	slog.Info("Starting application", "port", 8080, "env", "local")
 
 	cfg, err := config.Load()
 	if err != nil {
@@ -31,6 +39,7 @@ func main() {
 
 	mux := http.NewServeMux()
 
+
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, _ *http.Request) {
 		w.Write([]byte("OK"))
 	})
@@ -38,9 +47,12 @@ func main() {
 	mux.HandleFunc("GET /api/v1/podcasts/{id}", handler.GetPodcastByID)
 	mux.HandleFunc("POST /api/v1/podcasts", handler.CreatePodcast)
 
+	wrappedMux := httphandlers.LoggingMiddleware(mux)
+
+	
 	server := http.Server{
 		Addr:    ":8080",
-		Handler: mux,
+		Handler: wrappedMux,
 	}
 
 	log.Println("Starting server on :8080")
